@@ -1,13 +1,16 @@
 package com.haris.games.fiveormore;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.Random;
 
-public class GameEngine {
+public class GameEngine implements Serializable {
 
+	private static final long serialVersionUID = -2796373771546992212L;
+	
 	private int[][] board;
 	private int rows;
 	private int columns;
@@ -19,11 +22,27 @@ public class GameEngine {
 	private int points;
 
 	private int free;
+	private boolean fiveCleared = false;
 
 	// Number of figures which are added by the computer in each move.
 	public static final int NUM_OF_FIGURES_ADDED = 3;
 	
-	private static final Pair[] NEIGHBOURS = new Pair[] {new Pair(-1, 0), new Pair(0, 1), new Pair(1, 0), new Pair(0, -1)};
+	// By adding a pair to a coordinate, we get the neighbour of the coordinate.
+	private static final Pair[] NEIGHBOURS = new Pair[] {
+		new Pair(-1, 0), 	// down 
+		new Pair(0, 1), 	// up
+		new Pair(1, 0), 	// right
+		new Pair(0, -1)};	// left
+	
+	// Directions in which we check for same-valued fields.
+	// Basically, we have 8 directions, but it's enough to have four, since the
+	// other four can be calculated, by multiplying the first four with -1.
+	private static final Pair[] DIRECTIONS = new Pair[] {
+		new Pair(-1, -1), 	// south-est
+		new Pair(1, 0),		// east
+		new Pair(1, 1),		// north-east
+		new Pair(0, 1)		// north
+	};
 
 	public GameEngine(int rows, int columns, int figures) {
 		super();
@@ -51,14 +70,19 @@ public class GameEngine {
 	}
 
 	private void putOnRandomPlace(int figure) {
-		int x = random.nextInt(rows), y = random.nextInt(columns);
+		Pair randomCoordinate = nextRandomCoordinate();
 
-		while (board[x][y] != 0) {
-			x = random.nextInt(rows);
-			y = random.nextInt(columns);
+		while (getFieldAt(randomCoordinate) != 0) {
+			randomCoordinate = nextRandomCoordinate();
 		}
 
-		setFigureAt(x, y, figure);
+		setFieldAt(randomCoordinate, figure);
+		checkFiveOrMore(randomCoordinate);
+	}
+
+	private Pair nextRandomCoordinate() {
+		int x = random.nextInt(rows), y = random.nextInt(columns);
+		return new Pair(x, y);
 	}
 
 	private void generateNextFigures() {
@@ -122,7 +146,52 @@ public class GameEngine {
 		
 		setFieldAt(to, getFieldAt(from));
 		setFieldAt(from, 0);
+		setFiveCleared(checkFiveOrMore(to));
+		
 		return true;
+	}
+
+	private void setFiveCleared(boolean b) {
+		this.fiveCleared = b;
+	}
+
+	private boolean checkFiveOrMore(Pair start) {
+		boolean cleared = false;
+		
+		int count;
+		for (int i = 0; i < DIRECTIONS.length; i++) {
+			 count = 1;
+			 
+			 Pair move = start.add(DIRECTIONS[i]);
+			 while (isCoordinateAvailable(move)
+					 &&  getFieldAt(move) == getFieldAt(start)) {
+				 count++;
+				 move = move.add(DIRECTIONS[i]);
+			 }
+			 
+			 Pair oppositeDirection = DIRECTIONS[i].multiply(-1);
+			 move = start.add(oppositeDirection);
+			 while (isCoordinateAvailable(move)
+					 && getFieldAt(move) == getFieldAt(start)) {
+				 count++;
+				 move = move.add(oppositeDirection);
+			 }
+			 
+			 if (count >= 5) {
+				// move is currently at an unavailable index, or at an index
+				// where the field doesn't equal the one at "start"
+				// we start from move.add(DIRECTIONS[i])
+				for (int j = 1; j <= count; j++) {
+					move = move.add(DIRECTIONS[i]);
+					setFieldAt(move, 0);
+					points++;
+				}
+				
+				cleared = true;
+			 }
+		}
+		
+		return cleared;
 	}
 
 	private List<Pair> discoverShortestPath(Pair from, Pair to) {
@@ -171,9 +240,8 @@ public class GameEngine {
 		board[x][y] = figure;		
 	}
 
-	// TODO Implement this.
 	public boolean fiveCleared() {
-		return false;
+		return this.fiveCleared;
 	}
 
 }

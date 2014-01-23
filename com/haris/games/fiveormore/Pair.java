@@ -36,4 +36,8 @@ public class Pair {
 		return add(pair.x, pair.y);
 	}
 
+	public Pair multiply(int i) {
+		return new Pair(i * this.x, i * this.y);
+	}
+
 }

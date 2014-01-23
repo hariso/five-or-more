@@ -1,15 +1,22 @@
 package com.haris.games.fiveormore;
 
+import java.io.Closeable;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.Arrays;
 import java.util.Scanner;
 
 public class Console {
-	private static int rows, columns, figures;
-	private static Pair from, to;
-	private static GameEngine game;
-	private static Scanner in;
+	private int rows, columns, figures;
+	private Pair from, to;
+	private GameEngine game;
+	private Scanner in;
 	
-	public static void main(String[] args) {
+	public void start() {
 		in = new Scanner(System.in);
 
 		// Enter size
@@ -25,7 +32,7 @@ public class Console {
 
 		do {
 			System.out.println("POINTS: " + game.getPoints());
-			write(game.getBoard());
+			print(game.getBoard());
 
 			System.out.println("Next figures: " + Arrays.toString(game.getNextFigures()));
 
@@ -44,7 +51,7 @@ public class Console {
 		} while (!game.isBoardEmpty() && game.getNumOfEmptyFields() >= GameEngine.NUM_OF_FIGURES_ADDED);
 
 		System.out.println("POINTS: " + game.getPoints());
-		write(game.getBoard());
+		print(game.getBoard());
 
 		if (game.isBoardEmpty())
 			System.out.println("Congratulations, you won!");
@@ -55,7 +62,7 @@ public class Console {
 		in.close();
 	}
 
-	private static void readFromCoordinates() {
+	private void readFromCoordinates() {
 		boolean validInput = true;
 
 		do {
@@ -77,7 +84,7 @@ public class Console {
 		} while (!validInput);
 	}
 	
-	private static void readToCoordinates() {
+	private void readToCoordinates() {
 		boolean validInput = true;
 		
 		do {
@@ -105,7 +112,7 @@ public class Console {
 		} while (!validInput);
 	}
 
-	private static Pair readPair() {
+	private Pair readPair() {
 		return new Pair(in.nextInt(), in.nextInt());
 	}
 
@@ -114,7 +121,7 @@ public class Console {
 	 * 
 	 * @param m
 	 */
-	public static void write(int[][] m) {
+	public static void print(int[][] m) {
 		if (m == null) {
 			return;
 		}
@@ -141,6 +148,45 @@ public class Console {
 				System.out.println();
 			}
 
+		}
+	}
+
+	public void save(String name) {
+		FileOutputStream fileOut = null;
+		ObjectOutputStream out = null;
+		try {
+			fileOut = new FileOutputStream(name);
+			out = new ObjectOutputStream(fileOut);
+			out.writeObject(game);
+			System.out.println("Serialized data is saved in: " + name);
+		} catch (IOException i) {
+			i.printStackTrace();
+		} finally {
+			closeSilently(fileOut);
+			closeSilently(out);
+		}
+	}
+
+	public void load(String name) throws ClassNotFoundException, IOException {
+		FileInputStream fileIn = null;
+		ObjectInputStream in = null;
+		try {
+			fileIn = new FileInputStream(name);
+			in = new ObjectInputStream(fileIn);
+			this.game = (GameEngine) in.readObject();
+		} finally {
+			closeSilently(fileIn);
+			closeSilently(in);
+		}
+	}
+
+	private void closeSilently(Closeable c) {
+		if (c != null) {
+			try {
+				c.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 }

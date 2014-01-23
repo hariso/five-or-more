@@ -10,7 +10,6 @@ import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 
 public class GUI extends JFrame {
@@ -153,5 +152,10 @@ public class GUI extends JFrame {
 		optionsMenu.add(settings);
 		
 		return optionsMenu;
+	}
+	
+	private JMenu createHelpMenu() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }
