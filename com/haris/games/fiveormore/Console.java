@@ -2,7 +2,6 @@ package com.haris.games.fiveormore;
 
 import java.io.Closeable;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -40,13 +39,9 @@ public class Console {
 
 			readToCoordinates();
 
-			boolean moved = game.move(from.add(-1, -1), to.add(-1, -1)); 
+			boolean moved = game.move(from.add(-1, -1), to.add(-1, -1)) != null; 
 			if (!moved) {
 				System.out.println("You cannot move the figure to the given destination.");
-			} else {
-				if (!game.fiveCleared()) {
-					game.putFigures();
-				}
 			}
 		} while (!game.isBoardEmpty() && game.getNumOfEmptyFields() >= GameEngine.NUM_OF_FIGURES_ADDED);
 

@@ -1,0 +1,7 @@
+TODO
+
+#1
+
+Sinhronizirati brisanje petica, s obzirom da je potrebno i animirati pomjeranje figure.
+
+==========

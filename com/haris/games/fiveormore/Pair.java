@@ -3,6 +3,8 @@ package com.haris.games.fiveormore;
 public class Pair {
 	public int x;
 	public int y;
+	
+	public Object data;
 
 	public Pair(int x, int y) {
 		super();
@@ -26,8 +28,9 @@ public class Pair {
 
 	@Override
 	public String toString() {
-		return this.x + ", " + this.y;
+		return String.format("(%d, %d)", this.x, this.y);
 	}
+	
 	public Pair add(int addX, int addY) {
 		return new Pair(this.x + addX, this.y + addY);
 	}

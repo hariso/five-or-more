@@ -2,6 +2,7 @@ package com.haris.games.fiveormore;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -23,6 +24,8 @@ public class GameEngine implements Serializable {
 
 	private int free;
 	private boolean fiveCleared = false;
+
+	private boolean[][] visited;
 
 	// Number of figures which are added by the computer in each move.
 	public static final int NUM_OF_FIGURES_ADDED = 3;
@@ -57,10 +60,15 @@ public class GameEngine implements Serializable {
 
 		this.free = rows * columns;
 		
+		this.visited = new boolean[this.rows][this.columns];
+		
 		generateNextFigures();
 		putFigures();
 	}
 
+	/**
+	 * Put (already generated) figures
+	 */
 	public void putFigures() {
 		for (int i = 0; i < nextFigures.length; i++) {
 			putOnRandomPlace(nextFigures[i]);
@@ -80,11 +88,13 @@ public class GameEngine implements Serializable {
 		checkFiveOrMore(randomCoordinate);
 	}
 
+	// Get next radnom coordinate
 	private Pair nextRandomCoordinate() {
 		int x = random.nextInt(rows), y = random.nextInt(columns);
 		return new Pair(x, y);
 	}
 
+	// Generate next figures, pseudo-randomly
 	private void generateNextFigures() {
 		for (int i = 0; i < nextFigures.length; i++) {
 			nextFigures[i] = random.nextInt(figures) + 1;
@@ -116,7 +126,7 @@ public class GameEngine implements Serializable {
 		return getFieldAt(from) == 0;
 	}
 
-	private int getFieldAt(Pair coord) {
+	public int getFieldAt(Pair coord) {
 		return board[coord.x][coord.y];
 	}
 
@@ -130,7 +140,8 @@ public class GameEngine implements Serializable {
 
 	/**
 	 * Moves field from field at <code>from</code> to field at <code>to</code>,
-	 * if a path exists and returns true. Otherwise, returns false.
+	 * if a path exists and returns the path, as a list of coordinates to visit
+	 * in order to get to the destination. Otherwise, returns null.
 	 * 
 	 * @param from
 	 *            A 0-based coordinate.
@@ -138,17 +149,25 @@ public class GameEngine implements Serializable {
 	 *            A 0-based coordinate.
 	 * @return
 	 */
-	public boolean move(Pair from, Pair to) {
+	public List<Pair> move(Pair from, Pair to) {
+		// Check if we can move the figure
 		List<Pair> path = discoverShortestPath(from, to);
 		if (path == null) {
-			return false;
+			return path;
 		}
 		
+		// We have a path, lets move the figure
 		setFieldAt(to, getFieldAt(from));
 		setFieldAt(from, 0);
+
+		// Check if the user managed to put 
+		// an array of five or more same figures
 		setFiveCleared(checkFiveOrMore(to));
+		if (!fiveCleared()) {
+			putFigures();
+		}
 		
-		return true;
+		return path;
 	}
 
 	private void setFiveCleared(boolean b) {
@@ -202,18 +221,48 @@ public class GameEngine implements Serializable {
 		
 		while (!queue.isEmpty()) {
 			Pair head = queue.poll();
+			markAsVisited(head);
 			if (head.equals(to)) {
-				path = new ArrayList<Pair>();
+				path = extractPath(head);
 				break;
 			} else {
 				for (Pair neighbour : getNeighbours(head)) {
-					if (!queue.contains(neighbour) && isEmptyFieldAt(neighbour)) {
+					if (!isVisited(neighbour) && isEmptyFieldAt(neighbour)) {
+						neighbour.data = head;
 						queue.add(neighbour);
 					}
 				}
 			}
 		}
 		
+		clearVisitedMarks();
+		return path;
+	}
+
+	private void clearVisitedMarks() {
+		for (int i = 0; i < this.visited.length; i++) {
+			for (int j = 0; j < this.visited[i].length; j++) {
+				this.visited[i][j] = false;
+			}
+		}
+	}
+
+	private boolean isVisited(Pair coord) {
+		return this.visited[coord.x][coord.y];
+	}
+
+	private void markAsVisited(Pair coord) {
+		this.visited[coord.x][coord.y] = true;
+	}
+
+	private List<Pair> extractPath(Pair to) {
+		List<Pair> path = new ArrayList<Pair>();
+		
+		for (Pair current = to; current != null; current = (Pair) current.data) {
+			path.add(current);
+		}
+		
+		Collections.reverse(path);
 		return path;
 	}
 

@@ -20,24 +20,28 @@ public class GUI extends JFrame {
 	private MessagesPanel messages;
 	private JMenuBar menuBar;
 
-	private static final int DEF_NUM_OF_ROWS = 10;
-	private static final int DEF_NUM_OF_COLUMNS = 10;
-	private static final int DEF_NUM_OF_FIGURES = 5;
+	private static final int DEF_NUM_OF_ROWS = 5;
+	private static final int DEF_NUM_OF_COLUMNS = 5;
+	private static final int DEF_NUM_OF_FIGURES = 3;
 	
 	public GUI() {
+		super("Five or more!");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setResizable(false);
 		setLayout(new BorderLayout());
 		setBackground(Color.green);
 		
-		createMenuBar();
-		add(menuBar, BorderLayout.NORTH);
-		
+//		initMenuBar();
 		initGameBoard();
 		initMessagesPanel();
 		
 		pack();
 		setVisible(true);
+	}
+
+	private void initMenuBar() {
+		createMenuBar();
+		add(menuBar, BorderLayout.NORTH);		
 	}
 
 	private void initGameBoard() {
