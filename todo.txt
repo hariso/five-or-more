@@ -5,3 +5,5 @@ TODO
 Sinhronizirati brisanje petica, s obzirom da je potrebno i animirati pomjeranje figure.
 
 ==========
+
+Ma sve je ok, samo testiram web hook.
