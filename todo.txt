@@ -6,4 +6,4 @@ Sinhronizirati brisanje petica, s obzirom da je potrebno i animirati pomjeranje 
 
 ==========
 
-Ma sve je ok, samo testiram web hook.
+Ma sve je ok, samo testiram PRs and web hooks.
